@@ -7,10 +7,14 @@ from app.core.config import settings
 pwd_context = CryptContext(schemes=["argon2", "bcrypt"], deprecated="auto")
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
+    # Truncate to 72 bytes to avoid passlib bcrypt restriction if hash is bcrypt
+    if hashed_password.startswith(("$2a$", "$2b$", "$2y$")):
+        plain_password = plain_password[:72]
     return pwd_context.verify(plain_password, hashed_password)
 
 def get_password_hash(password: str) -> str:
-    return pwd_context.hash(password)
+    # Truncate to 72 bytes for safety with bcrypt/argon2 hybrid
+    return pwd_context.hash(password[:72])
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
     to_encode = data.copy()
