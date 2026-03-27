@@ -8,6 +8,7 @@ langchain-groq
 langchain-community
 langgraph
 PyJWT
-passlib[bcrypt,argon2]
+passlib[argon2]
+bcrypt==3.1.7
 argon2-cffi
 python-multipart
