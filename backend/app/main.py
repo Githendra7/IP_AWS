@@ -15,8 +15,9 @@ app.add_middleware(
     allow_origins=[
         FRONTEND_URL,
         "http://localhost:3000",
-        "https://*.vercel.app", # For Vercel production/preview
     ],
+    # This regex allows all Vercel preview/production domains
+    allow_origin_regex="https://.*\\.vercel\\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -29,4 +30,3 @@ def health_check():
 # Modular router registration
 app.include_router(auth_router, prefix="/api/auth", tags=["Authentication"])
 app.include_router(api_router, prefix="/api")
-
