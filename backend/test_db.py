@@ -1,12 +1,12 @@
-import sys
-from app.core.config import supabase_client
+import os
+from supabase import create_client
+from dotenv import load_dotenv
 
-res = supabase_client.table("project_phases").select("*").order("created_at", desc=True).limit(20).execute()
-with open("output.txt", "w", encoding="utf-8") as f:
-    f.write(f"Total Rows: {len(res.data)}\n")
-    for row in res.data:
-        p_id = row['project_id'].split('-')[0]
-        p_name = row['phase_name']
-        ai_data = row.get('ai_generated_data') or {}
-        hum_data = row.get('human_approved_data') or {}
-        f.write(f"Proj[{p_id}] Phase[{p_name}] AI_Len[{len(str(ai_data))}] Hum_Len[{len(str(hum_data))}]\n")
+load_dotenv()
+supabase = create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_SERVICE_ROLE_KEY"))
+
+res = supabase.table("projects").select("id, problem_statement").execute()
+for proj in res.data:
+    if proj["id"] in ["089f65bf-6dd5-4f87-a0a8-436f45b60734", "28fa63d2-0a84-4e26-8795-83173b1dd22c"]:
+        print("ID:", proj["id"])
+        print("PROBLEM STATEMENT:", repr(proj["problem_statement"]))

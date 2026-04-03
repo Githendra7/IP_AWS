@@ -36,7 +36,7 @@ class FunctionalTree(BaseModel):
     main_functions: List[MainFunction] = Field(description="The Level 1 functions that decompose the root function.")
 
 # Generator
-generator_llm = ChatGroq(temperature=0.7, model_name="llama-3.1-8b-instant", groq_api_key=settings.GROQ_API_KEY)
+generator_llm = ChatGroq(temperature=0.7, model_name="llama-3.3-70b-versatile", groq_api_key=settings.GROQ_API_KEY, max_retries=6)
 
 generator_prompt = ChatPromptTemplate.from_messages([
     ("system", "You are a Functional Architect specializing in engineering system abstraction across hardware, software, and hybrid domains. Your task is to perform an expert-level Functional Decomposition of the given problem statement to be used during the conceptual design phase. Transform the complex task into a sequence of smaller tasks recursively until the smallest sub-tasks can be easily translated into practical details.\n"
@@ -54,7 +54,7 @@ generator_prompt = ChatPromptTemplate.from_messages([
 phase1_generator = generator_prompt | generator_llm.with_structured_output(FunctionalTree)
 
 # Validator
-validator_llm = ChatGroq(temperature=0.0, model_name="llama-3.1-8b-instant", groq_api_key=settings.GROQ_API_KEY)
+validator_llm = ChatGroq(temperature=0.0, model_name="llama-3.1-8b-instant", groq_api_key=settings.GROQ_API_KEY, max_retries=6)
 
 validator_prompt = ChatPromptTemplate.from_messages([
     ("system", "You are an Engineering Validator. Evaluate the functional decomposition tree. Rules to check:\n1) NO physical components, specific real-world technologies, or specific software frameworks (e.g. 'solar', 'pump', 'React', 'SQL').\n2) Functions must be generic and abstract (Verb + Noun) specifying WHAT to do, not HOW to implement it (e.g., 'remove material' not 'grind wood', 'store information' not 'save to database').\n3) There must exist a defined hierarchy (root -> main_functions -> sub_functions).\n4) Separate Material, Energy, and Information flows MUST be identified for each function. Note: for software functions, Material/Energy flows might be 'N/A' or mapped to digital analogs (like 'structured data' or 'compute triggers'); ensure this mapping is logically sound.\nIf valid, return is_valid=True and empty feedback. If invalid, return is_valid=False and specify the exact rule violations."),
