@@ -36,7 +36,7 @@ class FunctionalTree(BaseModel):
     main_functions: List[MainFunction] = Field(description="The Level 1 functions that decompose the root function.")
 
 # Generator
-generator_llm = ChatGroq(temperature=0.7, model_name="llama-3.3-70b-versatile", groq_api_key=settings.GROQ_API_KEY)
+generator_llm = ChatGroq(temperature=0.7, model_name="llama-3.1-8b-instant", groq_api_key=settings.GROQ_API_KEY)
 
 generator_prompt = ChatPromptTemplate.from_messages([
     ("system", "You are a Functional Architect specializing in engineering system abstraction across hardware, software, and hybrid domains. Your task is to perform an expert-level Functional Decomposition of the given problem statement to be used during the conceptual design phase. Transform the complex task into a sequence of smaller tasks recursively until the smallest sub-tasks can be easily translated into practical details.\n"
