@@ -20,7 +20,7 @@ class SWOTAnalysis(BaseModel):
     analysis: List[SWOTItem] = Field(description="List of engineering SWOT analysis items.")
 
 # Generator
-generator_llm = ChatGroq(temperature=0.7, model_name="llama-3.3-70b-versatile", groq_api_key=settings.GROQ_API_KEY)
+generator_llm = ChatGroq(temperature=0.7, model_name="llama-3.1-8b-instant", groq_api_key=settings.GROQ_API_KEY)
 
 generator_prompt = ChatPromptTemplate.from_messages([
     ("system", "You are an Engineering Evaluation Agent. Your task is to perform a detailed SWOT analysis for EVERY engineering solution principle generated for the SPECIFIC function provided. Evaluate ALL alternatives for this single function. Each response must contain a complete Strengths, Weaknesses, Opportunities, and Threats assessment for every single alternative. You must not skip any alternatives. Each Weakness and Threat must include a specific engineering cause (e.g. friction, signal noise) and trade-off (e.g. cost vs reliability). Strengths and Opportunities should highlight inherent technical advantages or future potential. Maintain technical depth and avoid business or market considerations. Return a flat list of SWOT assessments for the alternatives provided."),
