@@ -1,80 +1,38 @@
-# Application Testing Guide
+# ProtoStruc: Backend Repository
 
-This guide details how to run and test the AI-Assisted Product Development Support Tool API.
+This is the central compute hub for ProtoStruc. Driven seamlessly by FastAPI and LangGraph, it parses user-commands into multi-layered product decomposition steps.
 
-## 1. Running the Application
+## Development Setup
 
-Before testing, ensure your FastAPI application is running.
+The backend utilizes Python 3.10+ environments. Ensure you instantiate a virtual playground to guarantee dependency locking.
 
-1. Open your terminal in the project directory (`d:\Main Projects\IPWithTools`).
-2. Activate your virtual environment:
-   ```powershell
-   .\venv\Scripts\activate
-   ```
-3. Start the server with hot-reloading:
-   ```powershell
-   uvicorn app.main:app --reload
-   ```
+```bash
+# 1. Create and hook the environment
+python -m venv venv
+.\venv\Scripts\activate
 
-The server should now be running at `http://127.0.0.1:8000`.
+# 2. Download dependencies
+pip install -r requirements.txt
 
----
+# 3. Align environment configuration inside `.env` utilizing identical keys from production
 
-## 2. Manual Testing via Swagger UI (Recommended)
+# 4. Boot the server and API documentation route
+uvicorn app.main:app --reload
+```
 
-FastAPI automatically generates an interactive testing interface. This is the easiest way to test your endpoints manually.
+## Testing Protocol
 
-1. Open your web browser and navigate to: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
-2. You will see a list of all available API endpoints (e.g., `/health`, `/api/projects`).
-3. Click on any endpoint to expand it.
-4. Click the **"Try it out"** button.
-5. Fill in any required parameters or request body (JSON).
-   * *Example for POST `/api/projects`:*
-     ```json
-     {
-       "problem_statement": "Design a portable solar-powered water purifier."
-     }
-     ```
-6. Click **"Execute"**. The UI will show the exact response from your server.
+To manually interface with the database or LLMs outside the Vercel Frontend environment, utilize FastAPI's native swagger generation.
 
-> **Note on Authentication:** Your API uses `Depends(get_current_user)`. To test endpoints requiring authentication via Swagger UI, you may need to click the "Authorize" button and provide a valid token, OR temporarily disable authentication in your routes for local testing.
+1. Navigate to `http://127.0.0.1:8000/docs`
+2. **Authorizing:** If hitting secured routes like `/api/projects`, authenticate via standard JWT exchange mappings in the auth portal located at the top of the swagger hub.
+3. Once fully authorized, you can simulate payload pushes directly utilizing the "Try it out" parameters.
 
----
+## Automated End-to-End Scenarios
 
-## 3. Automated End-to-End Testing
+The framework allows for rigorous simulation via Python. You can trigger simulated data-pipelines verifying everything from Phase 1 Node Decomposition through Phase 3 FMEA execution running:
 
-You can use the provided `test_flow.py` script to run an automated end-to-end test of the core application flow.
-
-The script tests:
-- Creating a new project.
-- Running Phase 1 (Functional Decomposition) and approving it.
-- Running Phase 2 (Morphological Chart) and approving it.
-- Running Phase 3 (Risk Analysis).
-
-### To run the automated test:
-
-1. Ensure the FastAPI server is running (see step 1).
-2. Open a *new* terminal window in your project directory.
-3. Activate the virtual environment (`.\venv\Scripts\activate`).
-4. Execute the test script:
-   ```powershell
-   python test_flow.py
-   ```
-
-### Important requirement for `test_flow.py`:
-The script sends a test JWT token (`Bearer test-token`). If your API specifically validates real Supabase JWTs, the test script will fail with a 401 Unauthorized or similar error. 
-To make the script work locally, either:
-- Temporarily remove the `Depends(get_current_user)` dependency from the endpoints in `app/api/routes.py`.
-- Update the `test_flow.py` headers to include a valid JWT from your Supabase project.
-
----
-
-## 4. Quick Health Check
-
-To simply verify that the server is up and responding, you can use the health check endpoint.
-
-* **Browser:** Visit [http://127.0.0.1:8000/health](http://127.0.0.1:8000/health)
-* **Terminal (cURL):**
-  ```powershell
-  curl http://127.0.0.1:8000/health
-  ```
+```powershell
+python test_flow.py
+```
+> Note: Make sure development JWT access controls are bypassed inside the test script headers, as test_flow runs independently of local storage protocols!

@@ -22,8 +22,8 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getProject, getPhase, runPhase } from "@/lib/api";
-import { toPng } from 'html-to-image';
 import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 
 export function PhasesContent({ projectId }: { projectId: string | null }) {
@@ -125,48 +125,146 @@ export function PhasesContent({ projectId }: { projectId: string | null }) {
     };
 
     const handleDownloadReport = async () => {
-        if (!reportRef.current) return;
         setDownloading(true);
 
-        const previousState = [...expandedSections];
-        setExpandedSections(["phase1", "phase2", "phase3"]);
-
-        // Wait for expanded sections to animate and render fully
-        await new Promise(resolve => setTimeout(resolve, 800));
-
         try {
-            const filter = (node: HTMLElement) => {
-                if (node.classList && node.classList.contains('no-print')) {
-                    return false;
-                }
-                return true;
-            };
-
-            const imgData = await toPng(reportRef.current, {
-                quality: 1,
-                backgroundColor: '#FDFCFB',
-                pixelRatio: 2,
-                filter: filter
-            });
-            
             const pdf = new jsPDF('p', 'mm', 'a4');
-            const pdfWidth = pdf.internal.pageSize.getWidth();
-            const pageHeight = pdf.internal.pageSize.getHeight();
-            const imgProps = pdf.getImageProperties(imgData);
-            
-            const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
-            
-            let heightLeft = imgHeight;
-            let position = 0;
+            const pageWidth = pdf.internal.pageSize.getWidth();
 
-            pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
-            heightLeft -= pageHeight;
+            // Cover Page / Header
+            pdf.setFontSize(24);
+            pdf.setTextColor(24, 24, 27); // zinc-900
+            
+            const rawTitle = project?.problem_statement || "ProtoStruc Design";
+            const safeTitle = rawTitle.replace(/\r?\n|\r/g, ' ').trim();
+            const displayTitle = safeTitle.charAt(0).toUpperCase() + safeTitle.slice(1);
+            
+            const titleLines = pdf.splitTextToSize(`${displayTitle} Report`, pageWidth - 28);
+            pdf.text(titleLines, 14, 22);
+            
+            // Calculate dynamic Y offset based on number of title lines
+            const titleOffset = (titleLines.length - 1) * 10;
+            
+            pdf.setFontSize(10);
+            pdf.setTextColor(113, 113, 122); // zinc-500
+            const createdDate = project?.created_at ? new Date(project.created_at).toLocaleDateString() : new Date().toLocaleDateString();
+            pdf.text(`Created at: ${createdDate}`, 14, 30 + titleOffset);
 
-            while (heightLeft > 0) {
-                position = heightLeft - imgHeight; // Shift position up by one page
+            let currentY = 45 + titleOffset;
+
+            // Phase 1: Functional Decomposition
+            if (p1Data && p1Data.length > 0) {
+                pdf.setFontSize(16);
+                pdf.setTextColor(24, 24, 27);
+                pdf.text("Phase 1: Functional Decomposition", 14, currentY);
+                
+                const p1Rows = p1Data.flatMap((item: any, idx: number) => {
+                    const rows = [];
+                    rows.push([(idx + 1).toString(), item.function || item.title || "-"]);
+                    if (item.sub_functions || item.children) {
+                        const subs = item.sub_functions || item.children;
+                        subs.forEach((sub: any) => {
+                            rows.push(["", "  • " + (sub.function || sub.title || "-")]);
+                        });
+                    }
+                    return rows;
+                });
+
+                autoTable(pdf, {
+                    startY: currentY + 5,
+                    head: [['#', 'Functional Requirement']],
+                    body: p1Rows,
+                    theme: 'grid',
+                    headStyles: { fillColor: [24, 24, 27], textColor: [255,255,255] },
+                    styles: { fontSize: 10, cellPadding: 4 },
+                    columnStyles: {
+                        0: { cellWidth: 15, halign: 'center' },
+                        1: { cellWidth: 'auto' }
+                    }
+                });
+                currentY = (pdf as any).lastAutoTable.finalY + 15;
+            }
+
+            // Phase 2: Morphological Chart
+            if (p2Data && p2Data.length > 0) {
+                // Check page break
+                if (currentY > 250) {
+                    pdf.addPage();
+                    currentY = 20;
+                }
+
+                pdf.setFontSize(16);
+                pdf.setTextColor(24, 24, 27);
+                pdf.text("Phase 2: Morphological Chart", 14, currentY);
+                
+                const p2Rows: any[] = [];
+                p2Data.forEach((item: any) => {
+                    const options = item.solutions || item.options || [];
+                    if (options.length === 0) {
+                        p2Rows.push([item.function || "-", "-", "-"]);
+                    } else {
+                        options.forEach((sol: any) => {
+                            const name = typeof sol === 'string' ? sol : (sol.principle || sol.name || "-");
+                            const desc = typeof sol === 'object' ? (sol.description || sol.rationale || "-") : "-";
+                            p2Rows.push([
+                                item.function || "-",
+                                name,
+                                desc
+                            ]);
+                        });
+                    }
+                });
+
+                autoTable(pdf, {
+                    startY: currentY + 5,
+                    head: [['Function', 'Alternative', 'Description']],
+                    body: p2Rows,
+                    theme: 'grid',
+                    headStyles: { fillColor: [24, 24, 27], textColor: [255,255,255] },
+                    styles: { fontSize: 10, cellPadding: 4 },
+                    columnStyles: {
+                        0: { cellWidth: 40, fontStyle: 'bold' },
+                        1: { cellWidth: 40, fontStyle: 'italic' },
+                        2: { cellWidth: 'auto' }
+                    }
+                });
+                currentY = (pdf as any).lastAutoTable.finalY + 15;
+            }
+
+            // Phase 3: Risk Analysis
+            if (p3Data && p3Data.length > 0) {
                 pdf.addPage();
-                pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
-                heightLeft -= pageHeight;
+                currentY = 20;
+
+                pdf.setFontSize(16);
+                pdf.setTextColor(24, 24, 27);
+                pdf.text("Phase 3: Design Evaluation (Risk Analysis)", 14, currentY);
+                
+                const p3Rows = p3Data.map((item: any) => [
+                    item.function_name || "-",
+                    item.solution_name || "-",
+                    item.strength || "-",
+                    item.weakness || "-",
+                    item.opportunity || "-",
+                    item.threat || "-"
+                ]);
+
+                autoTable(pdf, {
+                    startY: currentY + 5,
+                    head: [['Function', 'Alternative', 'Strength', 'Weakness', 'Opportunity', 'Threat']],
+                    body: p3Rows,
+                    theme: 'grid',
+                    headStyles: { fillColor: [24, 24, 27], textColor: [255,255,255] },
+                    styles: { fontSize: 8, cellPadding: 3 },
+                    columnStyles: {
+                        0: { cellWidth: 25, fontStyle: 'bold' },
+                        1: { cellWidth: 25, fontStyle: 'italic' },
+                        2: { cellWidth: 'auto' },
+                        3: { cellWidth: 'auto' },
+                        4: { cellWidth: 'auto' },
+                        5: { cellWidth: 'auto' }
+                    }
+                });
             }
 
             pdf.save(`ProtoStruc_Report_${projectId?.substring(0, 8)}.pdf`);
@@ -174,7 +272,6 @@ export function PhasesContent({ projectId }: { projectId: string | null }) {
             console.error('Failed to generate PDF:', error);
             alert('Error generating PDF report.');
         } finally {
-            setExpandedSections(previousState);
             setDownloading(false);
         }
     };

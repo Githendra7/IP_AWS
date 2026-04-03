@@ -1,36 +1,31 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ProtoStruc: Frontend Repository
 
-## Getting Started
+This contains the presentation logic for the ProtoStruc dashboard. It utilizes a stateful edge-rendered approach built entirely on Next.js 14 and TailwindCSS. 
 
-First, run the development server:
+## Development Setup
+
+The UI strictly relies on standard Node/NPM architecture. 
 
 ```bash
+# 1. Install packages
+npm install
+
+# 2. Assign environment variables inside `.env.local`
+# NEXT_PUBLIC_API_URL=http://127.0.0.1:8000/api
+
+# 3. Boot the local server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Visit `http://localhost:3000` to interact with the environment. Next.js natively handles hot-module reloads for immediate UI feedback.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Key Directories
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+* `/src/app/`: The Next.js App Router layer where all layouts, phase views, and authentication structures map to URLs.
+* `/src/components/`: Houses internal React components, ranging from small UI primitives (like standard ShadCN elements) to complex modules like our collapsible navigation `Sidebar.tsx`.
+* `/src/lib/api.ts`: **Core SDK File**. All endpoints leading into the backend architecture must be statically typed and invoked strictly from this centralized handler file.
 
-## Learn More
+## Styling Syntax
+Do NOT use custom overarching CSS parameters unless completely unavoidable. The application leverages pure utility-based Tailwind classes to establish grids, mobile responsiveness, and dark-mode implementations.
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+For UI animations, leverage Framer Motion (`motion.div`) hooks already present in the UI layers.
