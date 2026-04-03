@@ -130,3 +130,33 @@ export async function updatePhase(projectId: string, phaseName: string, humanApp
 
     return response.json();
 }
+
+export async function forgotPassword(email: string) {
+    const response = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+    });
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'Failed to send reset link');
+    }
+
+    return response.json();
+}
+
+export async function resetPassword(token: string, new_password: string) {
+    const response = await fetch(`${API_BASE_URL}/auth/reset-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token, new_password }),
+    });
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'Failed to reset password');
+    }
+
+    return response.json();
+}

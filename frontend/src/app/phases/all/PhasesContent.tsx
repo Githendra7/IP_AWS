@@ -227,7 +227,7 @@ export function PhasesContent({ projectId }: { projectId: string | null }) {
         <ProtectedRoute>
             <div className="min-h-screen bg-[#FDFCFB] pb-24" ref={reportRef}>
                 {/* Status Cards */}
-                <div className="px-12 py-8 grid grid-cols-1 md:grid-cols-3 gap-6 no-print">
+                <div className="px-4 md:px-12 pt-24 md:pt-8 pb-8 grid grid-cols-1 md:grid-cols-3 gap-6 no-print">
                     <motion.div
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -270,7 +270,7 @@ export function PhasesContent({ projectId }: { projectId: string | null }) {
                 </div>
 
                 {/* Main Content Sections */}
-                <div className="px-12 space-y-4">
+                <div className="px-4 md:px-12 space-y-4">
 
                     {/* Phase 1 Accordion */}
                     <AccordionSection
@@ -337,9 +337,9 @@ export function PhasesContent({ projectId }: { projectId: string | null }) {
                                         </div>
                                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                                             {(item.solutions || item.options || []).map((sol: any, sIdx: number) => (
-                                                <div key={sIdx} className="p-4 rounded-2xl border border-zinc-100 bg-zinc-50/50 hover:border-zinc-900 transition-colors group">
+                                                <div key={sIdx} className="p-4 rounded-2xl border border-zinc-100 bg-zinc-50/50 transition-colors">
                                                     <div className="text-sm font-bold text-zinc-900 mb-1">{typeof sol === 'string' ? sol : (sol.principle || sol.name)}</div>
-                                                    <div className="text-[11px] text-zinc-400 leading-relaxed truncate group-hover:whitespace-normal">
+                                                    <div className="text-[11px] text-zinc-400 leading-relaxed">
                                                         {typeof sol === 'object' && (sol.description || sol.rationale)}
                                                     </div>
                                                 </div>
@@ -366,7 +366,7 @@ export function PhasesContent({ projectId }: { projectId: string | null }) {
                         {p3Data ? (
                             <div className="space-y-6 overflow-x-auto">
                                 <div className="min-w-[1000px]">
-                                    <div className="grid grid-cols-[140px_160px_1fr_1fr_1fr_1fr] text-[10px] font-bold uppercase tracking-widest text-zinc-400 border-b border-zinc-100 pb-4 mb-4 px-2">
+                                    <div className="grid grid-cols-[140px_160px_1fr_1fr_1fr_1fr] gap-2 text-[10px] font-bold uppercase tracking-widest text-zinc-400 border-b border-zinc-100 pb-4 mb-4 px-2 text-center">
                                         <div>Function</div>
                                         <div>Alternative</div>
                                         <div>Strength</div>
@@ -376,7 +376,7 @@ export function PhasesContent({ projectId }: { projectId: string | null }) {
                                     </div>
                                     <div className="space-y-4">
                                         {p3Data.map((item: any, i: number) => (
-                                            <div key={i} className="grid grid-cols-[140px_160px_1fr_1fr_1fr_1fr] gap-4 py-4 border-b border-zinc-50 last:border-0 hover:bg-zinc-50/50 transition-colors rounded-xl px-2">
+                                            <div key={i} className="grid grid-cols-[140px_160px_1fr_1fr_1fr_1fr] gap-2 py-4 border-b border-zinc-50 last:border-0 hover:bg-zinc-50/50 transition-colors rounded-xl px-2">
                                                 <div className="text-sm font-bold text-zinc-900 pr-2">{item.function_name || "-"}</div>
                                                 <div className="text-sm font-bold text-zinc-700 pr-2 italic">{item.solution_name || "-"}</div>
                                                 <div className="text-xs text-zinc-600 leading-relaxed bg-emerald-50/30 p-3 rounded-xl border border-emerald-100/50">{item.strength || "-"}</div>

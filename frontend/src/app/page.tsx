@@ -61,7 +61,7 @@ export default function Home() {
         <Sidebar />
         {/* Main Content */}
         <main className="flex-1 overflow-auto">
-          <div className="max-w-4xl mx-auto p-8 py-16">
+          <div className="max-w-4xl mx-auto p-4 md:p-8 pt-24 md:pt-16">
             {/* Header */}
             <div className="text-center mb-12">
               <h1 className="text-4xl font-semibold mb-4">
@@ -113,7 +113,7 @@ export default function Home() {
                   You haven't created any projects yet. Describe your idea above to get started!
                 </div>
               ) : (
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {projects.slice(0, 4).map((project) => (
                     <Card
                       key={project.id}
