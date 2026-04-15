@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
 from fastapi.security import OAuth2PasswordRequestForm
 from app.core.security import create_access_token, get_password_hash, verify_password
 from app.models.schemas import UserRegister, UserLogin, Token, ForgotPasswordRequest, ResetPasswordRequest
 from app.core.config import supabase_client
 import secrets
 from datetime import datetime, timedelta, timezone
+from app.core.email import send_reset_password_email
 
 router = APIRouter()
 
@@ -67,12 +68,12 @@ def login(user_data: UserLogin):
     return {"access_token": access_token, "token_type": "bearer"}
 
 @router.post("/forgot-password")
-def forgot_password(req: ForgotPasswordRequest):
+def forgot_password(req: ForgotPasswordRequest, background_tasks: BackgroundTasks):
     # Check if user exists
     existing_user = supabase_client.table("users").select("*").eq("email", req.email).execute()
     if not existing_user.data:
-        # Don't reveal if user exists or not for security, but return None for dev_token
-        return {"message": "If an account with that email exists, we sent a password reset link.", "dev_reset_token": None}
+        # Don't reveal if user exists or not for security
+        return {"message": "If an account with that email exists, we sent a password reset link."}
     
     # Generate token
     token = secrets.token_urlsafe(32)
@@ -88,9 +89,10 @@ def forgot_password(req: ForgotPasswordRequest):
     if not res.data:
         raise HTTPException(status_code=500, detail="Failed to generate reset token")
         
+    background_tasks.add_task(send_reset_password_email, req.email, token)
+        
     return {
-        "message": "If an account with that email exists, we sent a password reset link.", 
-        "dev_reset_token": token
+        "message": "If an account with that email exists, we sent a password reset link."
     }
 
 @router.post("/reset-password")

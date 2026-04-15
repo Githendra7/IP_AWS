@@ -16,7 +16,6 @@ export default function ForgotPasswordPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
-  const [devToken, setDevToken] = useState(""); // For dev testing
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,12 +24,8 @@ export default function ForgotPasswordPage() {
     setSuccess(false);
     
     try {
-      const data = await forgotPassword(email);
+      await forgotPassword(email);
       setSuccess(true);
-      // For development: capture the token if returned
-      if (data.dev_reset_token) {
-        setDevToken(data.dev_reset_token);
-      }
     } catch (err: any) {
       setError(err.message || "Failed to send reset link");
     } finally {
@@ -92,15 +87,6 @@ export default function ForgotPasswordPage() {
                   <h3 className="font-bold text-lg mb-1">Check your email</h3>
                   <p className="text-sm">We've sent a password reset link to <span className="font-bold">{email}</span></p>
                 </div>
-                
-                {devToken && (
-                  <div className="mt-4 p-4 bg-zinc-900 text-emerald-400 rounded-lg w-full text-xs text-left overflow-hidden border border-zinc-700">
-                    <p className="text-zinc-400 mb-2">// DEV ENVIRONMENT BYPASS</p>
-                    <Link href={`/reset-password?token=${devToken}`} className="hover:underline break-all">
-                      http://localhost:3000/reset-password?token={devToken}
-                    </Link>
-                  </div>
-                )}
               </div>
               <Link href="/login">
                 <Button variant="outline" className="w-full h-12 rounded-xl font-bold">Back to login</Button>
